@@ -14,38 +14,34 @@ namespace WindowsFormsApp3
     {
         #region variables
         public static Bitmap boardBitmap;
-        public static Bitmap rackBitmap;
+        public static Bitmap topRack;
+        public static Bitmap bottomRack;
 
         public static Graphics rackGraphics;
         public static Graphics boardGraphics;
 
         private int _rows;
-        private int _cols;
-        private int _width;
+        private int _cols;    
         private int _height;
+
+        private int _formwidth;
 
         private int _rackrows;
         private int _rackcols;
-        private int _rackwidth;
         private int _rackheight;
 
-        public int tileW;
-        public int tileH;
+        private int tileW;
+        private int tileH;
 
-        public int rackW;
-        public int rackH;
+        private int rackW;
+        private int rackH;
 
-        public string[,] values;
-        public int[,] cellID;
+        private Tile[,] Tiles;
+        private TopRackTile[,] TopRack;
+        private BottomRackTile[,] BottomRack;
 
-        public string[,] toprackvalues;
-        public int[,] toprackcellID;
-
-        public string[,] botrackvalues;
-        public int[,] botrackcellID;
-
-        public bool playerOneTurn;
-        public bool firstTurn;
+        private bool playerOneTurn;
+        private bool firstTurn;
 
         Random rand = new Random();
 
@@ -60,8 +56,11 @@ namespace WindowsFormsApp3
         public Form1()
         {
             InitializeComponent();
+
             playerOneTurn = true;
             firstTurn = true;
+            this.Text = "Player One's Turn!";
+
             setupRack(600, 75, 1, 8);
             setupBoard(600, 600, 15, 15);
             
@@ -80,19 +79,18 @@ namespace WindowsFormsApp3
             }
 
             //Move variables to private and initialize graphics etc.
-            _width = width;
+            _formwidth = width;
             _height = height;
             _rows = rows;
             _cols = cols;
-	        tileW = _width / _cols;
+	        tileW = _formwidth / _cols;
             tileH = _height / _rows;
-	        boardBitmap = new Bitmap(_width, _height);
+	        boardBitmap = new Bitmap(_formwidth, _height);
             boardGraphics = Graphics.FromImage(boardBitmap);
             boardGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-	        //Initialize arrays
-            values = new string[_rows, _cols];
-            cellID = new int[_rows, _cols];
+            //Initialize arrays
+            Tiles = new Tile[_rows, _cols];
             int counter = 0;
 
 	        //Create cells on the board
@@ -100,26 +98,17 @@ namespace WindowsFormsApp3
             {
                 for(int j = 0; j < _cols; j++)
                 {
-                    cellID[i, j] = counter;
+                    Tiles[i, j] = new Tile();
+                    Tiles[i, j].ID = counter;
+                    Tiles[i, j].Value = null;
                     counter++;
-                    values[i, j] = null;
                 }
             }
 
-            displayCells();
-
-	        //Draw grid lines
-            for (int i = 0; i <= _rows; i++)
-            {
-                for (int j = 0; j <= _cols; j++)
-                {
-                    boardGraphics.DrawLine(Pens.Black, 0, i * (_width / _cols), _cols * (_width / _cols), i * (_width / _cols));
-                    boardGraphics.DrawLine(Pens.Black, j * (_height / _rows), 0, j * (_height / _rows), _rows * (_width / _rows));
-                }
-            }
+            renderTiles();
 
             //Adjust form size
-            this.Width = _width + 40;
+            this.Width = _formwidth + 40;
             this.Height = _height + 300;
 
             //Change some form settings
@@ -127,7 +116,7 @@ namespace WindowsFormsApp3
             pbBoard.Name = "Main Board";
             pbBoard.MouseClick += new MouseEventHandler(cellClicked);
             pbBoard.Image = boardBitmap;
-            pbBoard.SetBounds(5, 29, _width + 4, _height);
+            pbBoard.SetBounds(5, 29, _formwidth + 4, _height);
             pbBoard.BorderStyle = BorderStyle.FixedSingle;
             this.Controls.Add(pbBoard);
             pbBoard.Location = new Point(0, 75);
@@ -142,26 +131,28 @@ namespace WindowsFormsApp3
                 this.Controls.Remove(pbTopRack);
                 this.Controls.Remove(pbBottomRack);
                 this.Refresh();
-                rackBitmap = null;
+                topRack = null;
+                bottomRack = null;
                 pbTopRack = null;
                 pbBottomRack = null;
             }
-            
+
             //Move variables to private and initialize graphics etc
-            _rackwidth = width;
+            _formwidth = width;
             _rackheight = height;
             _rackrows = Rows;
             _rackcols = Cols;
-            rackW = _rackwidth / _rackcols;
+            rackW = _formwidth / _rackcols;
             rackH = _rackheight / _rackrows;
-            rackBitmap = new Bitmap(_rackwidth, _rackheight);
-            rackGraphics = Graphics.FromImage(rackBitmap);
-            rackGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             #region Top Rack
+            //Initialize Bitmap and Graphics
+            topRack = new Bitmap(_formwidth, _rackheight);
+            rackGraphics = Graphics.FromImage(topRack);
+            rackGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
             //Initialize arrays
-            toprackvalues = new string[_rackrows, _rackcols];
-            toprackcellID = new int[_rackrows, _rackcols];
+            TopRack = new TopRackTile[_rackrows, _rackcols];
             int counter = 0;
 
             //Create cells in each rack
@@ -169,47 +160,38 @@ namespace WindowsFormsApp3
             {
                 for (int j = 0; j < _rackcols; j++)
                 {
-                    toprackcellID[i, j] = counter;
+                    TopRack[i, j] = new TopRackTile();
+                    TopRack[i, j].ID = counter;
                     counter++;
+
                     int num = rand.Next(0, 26); // Zero to 25
                     char let = (char)('a' + num);
-                    toprackvalues[i, j] = let.ToString().ToUpper();
+                    TopRack[i,j].Value = let.ToString().ToUpper();
                 }
             }
 
             displayRack("Top");
 
-            //Draw grid lines
-            for (int i = 0; i <= _rackrows; i++)
-            {
-                for (int j = 0; j <= _rackcols; j++)
-                {
-                    rackGraphics.DrawLine(Pens.Black, 0, i * (_rackwidth / _rackcols), _rackcols * (_rackwidth / _rackcols), i * (_rackwidth / _rackcols));
-                    rackGraphics.DrawLine(Pens.Black, j * (_rackheight / _rackrows), 0, j * (_rackheight / _rackrows), _rackrows * (_rackwidth / _rackrows));
-                }
-            }
-
             //Change some form settings
             pbTopRack = new PictureBox();
             pbTopRack.Name = "Top Rack";
             pbTopRack.MouseClick += new MouseEventHandler(cellClicked);
-            pbTopRack.Image = rackBitmap;
-            pbTopRack.SetBounds(5, 29, _rackwidth + 4, _rackheight);
+            pbTopRack.Image = topRack;
+            pbTopRack.SetBounds(5, 29, _formwidth + 4, _rackheight);
             pbTopRack.BorderStyle = BorderStyle.FixedSingle;
             this.Controls.Add(pbTopRack);
             pbTopRack.Location = new Point(0, 0);
             #endregion
 
             #region Bottom Rack
-            //Reinitialize bitmap and graphics for new rack
-            rackBitmap = new Bitmap(_rackwidth, _rackheight);
-            rackGraphics = Graphics.FromImage(rackBitmap);
+            //Initialize bitmap and graphics for rack
+            bottomRack = new Bitmap(_formwidth, _rackheight);
+            rackGraphics = Graphics.FromImage(bottomRack);
             rackGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            
+
             //Initialize arrays
-            botrackvalues = new string[_rackrows, _rackcols];
-            botrackcellID = new int[_rackrows, _rackcols];
+            BottomRack = new BottomRackTile[_rackrows, _rackcols];
             counter = 0;
 
             //Create the cells in each rack
@@ -217,32 +199,24 @@ namespace WindowsFormsApp3
             {
                 for (int j = 0; j < _rackcols; j++)
                 {
-                    botrackcellID[i, j] = counter;
+                    BottomRack[i, j] = new BottomRackTile();
+                    BottomRack[i, j].ID = counter;
                     counter++;
+
                     int num = rand.Next(0, 26); // Zero to 25
                     char let = (char)('a' + num);
-                    botrackvalues[i, j] = let.ToString().ToUpper();
+                    BottomRack[i, j].Value = let.ToString().ToUpper();
                 }
             }
 
             displayRack("Bottom");
 
-            //Draw gridlines
-            for (int i = 0; i <= _rackrows; i++)
-            {
-                for (int j = 0; j <= _rackcols; j++)
-                {
-                    rackGraphics.DrawLine(Pens.Black, 0, i * (_rackwidth / _rackcols), _rackcols * (_rackwidth / _rackcols), i * (_rackwidth / _rackcols));
-                    rackGraphics.DrawLine(Pens.Black, j * (_rackheight / _rackrows), 0, j * (_rackheight / _rackrows), _rackrows * (_rackwidth / _rackrows));
-                }
-            }
-
             //Change some form settings
             pbBottomRack = new PictureBox();
             pbBottomRack.Name = "Bottom Rack";
             pbBottomRack.MouseClick += new MouseEventHandler(cellClicked);
-            pbBottomRack.Image = rackBitmap;
-            pbBottomRack.SetBounds(5, 29, _rackwidth + 4, _rackheight);
+            pbBottomRack.Image = bottomRack;
+            pbBottomRack.SetBounds(5, 29, _formwidth + 4, _rackheight);
             pbBottomRack.BorderStyle = BorderStyle.FixedSingle;
             this.Controls.Add(pbBottomRack);
             pbBottomRack.Location = new Point(0, 675);
@@ -250,7 +224,7 @@ namespace WindowsFormsApp3
         }
 
 
-        private void displayCells()
+        private void renderTiles()
         {
             //Clear background colour
             boardGraphics.Clear(this.BackColor);
@@ -267,7 +241,7 @@ namespace WindowsFormsApp3
                     int drawY = _y + tileH / 3;
 
                     //Get ID from cellID array
-                    int ID = cellID[i, j];
+                    int ID = Tiles[i, j].ID;
 
                     switch (ID)
                     {
@@ -379,6 +353,16 @@ namespace WindowsFormsApp3
                 }
             }
 
+            //Draw grid lines
+            for (int i = 0; i <= _rows; i++)
+            {
+                for (int j = 0; j <= _cols; j++)
+                {
+                    boardGraphics.DrawLine(Pens.Black, 0, i * (_formwidth / _cols), _cols * (_formwidth / _cols), i * (_formwidth / _cols));
+                    boardGraphics.DrawLine(Pens.Black, j * (_height / _rows), 0, j * (_height / _rows), _rows * (_formwidth / _rows));
+                }
+            }
+
             //Forces execution of all pending graphics operations and returns immediately without waiting for the operations to finish
             boardGraphics.Flush();
             this.Refresh();
@@ -405,13 +389,23 @@ namespace WindowsFormsApp3
                     switch(rackPosition)
                     {
                         case "Top":
-                            rackGraphics.DrawString(toprackvalues[i, j], myFont, Brushes.Black, drawX, drawY);
+                            rackGraphics.DrawString(TopRack[i,j].Value, myFont, Brushes.Black, drawX, drawY);
                             break;
 
                         case "Bottom":
-                            rackGraphics.DrawString(botrackvalues[i, j], myFont, Brushes.Black, drawX, drawY);
+                            rackGraphics.DrawString(BottomRack[i, j].Value, myFont, Brushes.Black, drawX, drawY);
                             break;
                     }
+                }
+            }
+
+            //Draw grid lines
+            for (int i = 0; i <= _rackrows; i++)
+            {
+                for (int j = 0; j <= _rackcols; j++)
+                {
+                    rackGraphics.DrawLine(Pens.Black, 0, i * (_formwidth / _rackcols), _rackcols * (_formwidth / _rackcols), i * (_formwidth / _rackcols));
+                    rackGraphics.DrawLine(Pens.Black, j * (_rackheight / _rackrows), 0, j * (_rackheight / _rackrows), _rackrows * (_formwidth / _rackrows));
                 }
             }
 
@@ -424,18 +418,26 @@ namespace WindowsFormsApp3
         private void placeLetter(int letterRow, int letterCol)
         {
             //Retrieve the letter that needs to be rendered
-            letterToPlace = values[letterRow,letterCol];
+            letterToPlace = Tiles[letterRow,letterCol].Value;
+            Tiles[letterRow, letterCol].Occupied = true;
             
             //Maths to solve x and y position of the letter
             int _letterx = letterCol * tileW;
             int _lettery = letterRow * tileH;
             int drawX = _letterx + tileW / 3;
             int drawY = _lettery + tileH / 3;
-            
-            //Fill rectangle behind the letter and then render the letter onto this rectangle
-            boardGraphics.FillRectangle(customBrush, _letterx, _lettery, tileW, tileH);
-            boardGraphics.DrawString(letterToPlace, myFont, Brushes.Black, drawX, drawY);
-            pbBoard.Image = boardBitmap;
+
+            if (Tiles[letterRow, letterCol].Editable == true)
+            {
+                //Fill rectangle behind the letter and then render the letter onto this rectangle
+                boardGraphics.FillRectangle(customBrush, _letterx, _lettery, tileW, tileH);
+                boardGraphics.DrawString(letterToPlace, myFont, Brushes.Black, drawX, drawY);
+                pbBoard.Image = boardBitmap; 
+            } 
+            else
+            {
+                MessageBox.Show("There is already a letter on that tile!");
+            }
 
             //Forces execution of all pending graphics operations and returns immediately without waiting for the operations to finish
             rackGraphics.Flush();
@@ -455,8 +457,8 @@ namespace WindowsFormsApp3
 
             //Maths to figure out which cell was clicked base on the x and y position of the mouse
             row = e.Y * _rows / _height;
-            col = e.X * _cols / _width;
-            oldVal = values[row, col];
+            col = e.X * _cols / _formwidth;
+            oldVal = Tiles[row, col].Value;
 
             //Switch statement based on the names of the picture box clicked. Names were given in the setupBoard and setupRack functions
             switch (myPicture.Name)
@@ -469,17 +471,17 @@ namespace WindowsFormsApp3
                         case MouseButtons.Right:
                             //Render the default look of the cell, whether this is a default, or special tiles does not matter
                             renderDefaultCell(row, col);
-                            txtDebug.Text = "X: " + col + ", Y: " + row + ", Old Value: " + oldVal + ", New Value: " + values[row, col] + ", ID: " + cellID[row, col];
+                            txtDebug.Text = "X: " + col + ", Y: " + row + ", Old Value: " + oldVal + ", New Value: " + Tiles[row, col].Value + ", ID: " + Tiles[row, col].ID;
                             break;
 
                         case MouseButtons.Left:
                             //If letterToPlace has a letter, then update the value stored in the cell and then render this letter to the cell
                             if (letterToPlace != null)
                             {
-                                values[row, col] = letterToPlace;
+                                Tiles[row, col].Value = letterToPlace;
                                 placeLetter(row, col);
                             }
-                            txtDebug.Text = "X: " + col + ", Y: " + row + ", Old Value: " + oldVal + ", New Value: " + values[row, col] + ", ID: " + cellID[row, col];
+                            txtDebug.Text = "X: " + col + ", Y: " + row + ", Old Value: " + oldVal + ", New Value: " + Tiles[row, col].Value + ", ID: " + Tiles[row, col].ID;
                             break;
                     }
                     break;
@@ -488,22 +490,22 @@ namespace WindowsFormsApp3
                 case "Bottom Rack":
                     //If bottomrack then retrieve value from bottomrack array
                     row = e.Y * _rackrows / _rackheight;
-                    col = e.X * _rackcols / _rackwidth;
-                    oldVal = botrackvalues[row, col];
+                    col = e.X * _rackcols / _formwidth;
+                    oldVal = BottomRack[row, col].Value;
 
                     //TODO retrieve tile value
-                    letterToPlace = botrackvalues[row, col];
+                    letterToPlace = BottomRack[row, col].Value;
                     break;
                 #endregion
                 #region Top Rack
                 case "Top Rack":
                     //If toprack then retrieve value from toprack array
                     row = e.Y * _rackrows / _rackheight;
-                    col = e.X * _rackcols / _rackwidth;
-                    oldVal = toprackvalues[row, col];
+                    col = e.X * _rackcols / _formwidth;
+                    oldVal = TopRack[row, col].Value;
 
                     //TODO retrieve tile value
-                    letterToPlace = toprackvalues[row, col];
+                    letterToPlace = TopRack[row, col].Value;
                     break;
                 #endregion
             }
@@ -515,6 +517,8 @@ namespace WindowsFormsApp3
             //Update graphics smoothing mode to give an antialiased line, more useful for the center star
             boardGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
+
+
             //Maths to figure x and y positions of the letter
             int _x = cellCol * tileW;
             int _y = cellRow * tileH;
@@ -522,8 +526,9 @@ namespace WindowsFormsApp3
             int drawY = _y + tileH / 3;
 
             //Get ID of cell and then update value stored
-            int ID = cellID[cellRow, cellCol];
-            values[cellRow, cellCol] = null;
+            int ID = Tiles[cellRow, cellCol].ID;
+            Tiles[cellRow, cellCol].Value = null;
+            Tiles[cellRow, cellCol].Occupied = false;
 
             switch (ID)
             {
@@ -636,8 +641,8 @@ namespace WindowsFormsApp3
             {
                 for (int j = 0; j <= _cols; j++)
                 {
-                    boardGraphics.DrawLine(Pens.Black, 0, i * (_width / _cols), _cols * (_width / _cols), i * (_width / _cols));
-                    boardGraphics.DrawLine(Pens.Black, j * (_height / _rows), 0, j * (_height / _rows), _rows * (_width / _rows));
+                    boardGraphics.DrawLine(Pens.Black, 0, i * (_formwidth / _cols), _cols * (_formwidth / _cols), i * (_formwidth / _cols));
+                    boardGraphics.DrawLine(Pens.Black, j * (_height / _rows), 0, j * (_height / _rows), _rows * (_formwidth / _rows));
                 }
             }
 
@@ -649,7 +654,41 @@ namespace WindowsFormsApp3
 
         private void endTurn()
         {
+            if(firstTurn == true)
+            {
+                if(Tiles[7,7].Occupied ==false)
+                {
+                    MessageBox.Show("Make sure the center tile is occupied on the first turn", "Center Tile not occupied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
 
+
+            findOccupiedTiles();
+
+            playerOneTurn = !playerOneTurn;
+            if(playerOneTurn == true)
+            {
+                this.Text = "Player One's Turn!";
+            }
+            else
+            {
+                this.Text = "Player Two's Turn!";
+            }
+        }
+
+
+        private void findOccupiedTiles()
+        {
+            for (int i = 0; i < _rows; i++)
+            {
+                for (int j = 0; j < _cols; j++)
+                {
+                    if(Tiles[i,j].Occupied == true)
+                    {
+                        Tiles[i, j].Editable = false;
+                    }
+                }
+            }
         }
 
 
