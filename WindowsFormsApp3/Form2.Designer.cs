@@ -32,6 +32,7 @@
             this.btnLessPlayers = new System.Windows.Forms.Button();
             this.lblPlayers = new System.Windows.Forms.Label();
             this.btnPlay = new System.Windows.Forms.Button();
+            this.txtFilePath = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnMorePlayers
@@ -73,11 +74,20 @@
             this.btnPlay.UseVisualStyleBackColor = true;
             this.btnPlay.Click += new System.EventHandler(this.btnPlay_Click);
             // 
+            // txtFilePath
+            // 
+            this.txtFilePath.Enabled = false;
+            this.txtFilePath.Location = new System.Drawing.Point(15, 342);
+            this.txtFilePath.Name = "txtFilePath";
+            this.txtFilePath.Size = new System.Drawing.Size(100, 20);
+            this.txtFilePath.TabIndex = 4;
+            // 
             // frmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(423, 403);
+            this.Controls.Add(this.txtFilePath);
             this.Controls.Add(this.btnPlay);
             this.Controls.Add(this.lblPlayers);
             this.Controls.Add(this.btnLessPlayers);
@@ -95,5 +105,6 @@
         private System.Windows.Forms.Button btnLessPlayers;
         private System.Windows.Forms.Label lblPlayers;
         private System.Windows.Forms.Button btnPlay;
+        private System.Windows.Forms.TextBox txtFilePath;
     }
 }

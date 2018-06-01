@@ -38,6 +38,8 @@ namespace WindowsFormsApp3
         private Rack[][,] Racks;
         private Tile[,] Tiles;
 
+        public static List<Tile> editedTiles = new List<Tile>();
+
         private int playerTurn;
         private bool firstTurn;
 
@@ -629,6 +631,10 @@ namespace WindowsFormsApp3
 
             findOccupiedTiles();
 
+            SearchAlgorithm.search(editedTiles);
+
+            editedTiles.Clear();
+            #region player info
             refreshRack();
 
             if (playerTurn < _numberOfPlayers - 1)
@@ -644,7 +650,7 @@ namespace WindowsFormsApp3
             this.Text = String.Format("Player {0}'s Turn!", playerTurn + 1);
 
             renderRack();
-
+            #endregion
         }
 
 
@@ -657,6 +663,7 @@ namespace WindowsFormsApp3
                     if (Tiles[i, j].Occupied == true)
                     {
                         Tiles[i, j].Editable = false;
+                        editedTiles.Add(Tiles[i, j]);
                     }
                 }
             }
@@ -682,6 +689,7 @@ namespace WindowsFormsApp3
                 }
             }
         }
+
 
         private string getRandomLetter()
         {

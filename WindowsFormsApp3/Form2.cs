@@ -12,12 +12,14 @@ namespace WindowsFormsApp3
 {
     public partial class frmSettings : Form
     {
-        public frmSettings()
+         public frmSettings()
         {
             InitializeComponent();
+            Dictionary.loadDictionary();
             frmGame.numberOfPlayers = 1;
             lblPlayers.Text = string.Format("Number of players: {0}", frmGame.numberOfPlayers);
         }
+
 
         private void btnMorePlayers_Click(object sender, EventArgs e)
         {
