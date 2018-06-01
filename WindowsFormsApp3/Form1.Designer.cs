@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApp3
 {
-    partial class Form1
+    partial class frmGame
     {
         /// <summary>
         /// Required designer variable.
@@ -30,11 +30,11 @@
         {
             this.pbBoard = new System.Windows.Forms.PictureBox();
             this.txtDebug = new System.Windows.Forms.TextBox();
-            this.pbTopRack = new System.Windows.Forms.PictureBox();
+            this.pbRack = new System.Windows.Forms.PictureBox();
             this.pbBottomRack = new System.Windows.Forms.PictureBox();
             this.btnEndTurn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbBoard)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbTopRack)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbRack)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbBottomRack)).BeginInit();
             this.SuspendLayout();
             // 
@@ -53,14 +53,14 @@
             this.txtDebug.Size = new System.Drawing.Size(455, 20);
             this.txtDebug.TabIndex = 1;
             // 
-            // pbTopRack
+            // pbRack
             // 
-            this.pbTopRack.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.pbTopRack.Location = new System.Drawing.Point(12, 68);
-            this.pbTopRack.Name = "pbTopRack";
-            this.pbTopRack.Size = new System.Drawing.Size(455, 50);
-            this.pbTopRack.TabIndex = 2;
-            this.pbTopRack.TabStop = false;
+            this.pbRack.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.pbRack.Location = new System.Drawing.Point(12, 68);
+            this.pbRack.Name = "pbRack";
+            this.pbRack.Size = new System.Drawing.Size(455, 50);
+            this.pbRack.TabIndex = 2;
+            this.pbRack.TabStop = false;
             // 
             // pbBottomRack
             // 
@@ -87,13 +87,13 @@
             this.ClientSize = new System.Drawing.Size(566, 803);
             this.Controls.Add(this.btnEndTurn);
             this.Controls.Add(this.pbBottomRack);
-            this.Controls.Add(this.pbTopRack);
+            this.Controls.Add(this.pbRack);
             this.Controls.Add(this.txtDebug);
             this.Controls.Add(this.pbBoard);
             this.Name = "Form1";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.pbBoard)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbTopRack)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbRack)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbBottomRack)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -104,7 +104,7 @@
 
         private System.Windows.Forms.PictureBox pbBoard;
         private System.Windows.Forms.TextBox txtDebug;
-        private System.Windows.Forms.PictureBox pbTopRack;
+        private System.Windows.Forms.PictureBox pbRack;
         private System.Windows.Forms.PictureBox pbBottomRack;
         private System.Windows.Forms.Button btnEndTurn;
     }

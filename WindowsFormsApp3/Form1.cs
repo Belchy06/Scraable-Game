@@ -10,12 +10,11 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApp3
 {
-    public partial class Form1 : Form
+    public partial class frmGame : Form
     {
         #region variables
         public static Bitmap boardBitmap;
-        public static Bitmap topRack;
-        public static Bitmap bottomRack;
+        public static Bitmap rackBitmap;
 
         public static Graphics rackGraphics;
         public static Graphics boardGraphics;
@@ -36,12 +35,18 @@ namespace WindowsFormsApp3
         private int rackW;
         private int rackH;
 
+        private Rack[][,] Racks;
         private Tile[,] Tiles;
-        private TopRackTile[,] TopRack;
-        private BottomRackTile[,] BottomRack;
 
-        private bool playerOneTurn;
+        private int playerTurn;
         private bool firstTurn;
+
+        private static int _numberOfPlayers;
+        public static int numberOfPlayers
+        {
+            get { return _numberOfPlayers; }
+            set { _numberOfPlayers = value; }
+        }
 
         Random rand = new Random();
 
@@ -53,13 +58,18 @@ namespace WindowsFormsApp3
         Font myFont = new Font("Arial", 15, FontStyle.Bold, GraphicsUnit.Pixel);
         #endregion
 
-        public Form1()
+        public frmGame()
         {
             InitializeComponent();
 
-            playerOneTurn = true;
+            playerTurn = 0;
+
+            Bag.PopulateTiles();
+
+            Racks = new Rack[numberOfPlayers][,];
+
             firstTurn = true;
-            this.Text = "Player One's Turn!";
+            this.Text = String.Format("Player {0}'s Turn!", playerTurn + 1);
 
             setupRack(600, 75, 1, 8);
             setupBoard(600, 600, 15, 15);
@@ -125,101 +135,66 @@ namespace WindowsFormsApp3
 
         private void setupRack(int width, int height, int Rows, int Cols)
         {
-            //If top and bottom rack pb's are occupied then clear them
-            if (pbTopRack != null || pbBottomRack != null)
+            //If rack is occupied 
+            if (pbRack != null)
             {
-                this.Controls.Remove(pbTopRack);
-                this.Controls.Remove(pbBottomRack);
+                this.Controls.Remove(pbRack);
                 this.Refresh();
-                topRack = null;
-                bottomRack = null;
-                pbTopRack = null;
-                pbBottomRack = null;
+                rackBitmap = null;
+                pbRack = null;
             }
 
             //Move variables to private and initialize graphics etc
-            _formwidth = width;
             _rackheight = height;
+            _formwidth = width;
             _rackrows = Rows;
             _rackcols = Cols;
             rackW = _formwidth / _rackcols;
             rackH = _rackheight / _rackrows;
 
-            #region Top Rack
+            #region Rack
             //Initialize Bitmap and Graphics
-            topRack = new Bitmap(_formwidth, _rackheight);
-            rackGraphics = Graphics.FromImage(topRack);
+            rackBitmap = new Bitmap(_formwidth, _rackheight);
+            rackGraphics = Graphics.FromImage(rackBitmap);
             rackGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             //Initialize arrays
-            TopRack = new TopRackTile[_rackrows, _rackcols];
-            int counter = 0;
+            Racks = new Rack[numberOfPlayers][,];        
 
-            //Create cells in each rack
-            for (int i = 0; i < _rackrows; i++)
+            //For each player, create the rows and columns in each players rack
+            for (int p = 0; p < numberOfPlayers; p++)
             {
-                for (int j = 0; j < _rackcols; j++)
+                int counter = 0;
+                Racks[p] = new Rack[_rackrows, _rackcols];
+                for (int i = 0; i < _rackrows; i++)
                 {
-                    TopRack[i, j] = new TopRackTile();
-                    TopRack[i, j].ID = counter;
-                    counter++;
+                    for (int j = 0; j < _rackcols; j++)
+                    {
+                        Racks[p][i, j] = new Rack();
+                        Racks[p][i, j].Name = "Player: " + p.ToString();
 
-                    int num = rand.Next(0, 26); // Zero to 25
-                    char let = (char)('a' + num);
-                    TopRack[i,j].Value = let.ToString().ToUpper();
-                }
+                        Racks[p][i, j].ID = counter;
+                        counter++;
+
+                        int num = rand.Next(0, 26);
+                        char let = (char)('a' + num);
+                        Racks[p][i, j].Value = let.ToString().ToUpper();
+                    }
+                } 
             }
 
-            displayRack("Top");
+            renderRack();
 
-            //Change some form settings
-            pbTopRack = new PictureBox();
-            pbTopRack.Name = "Top Rack";
-            pbTopRack.MouseClick += new MouseEventHandler(cellClicked);
-            pbTopRack.Image = topRack;
-            pbTopRack.SetBounds(5, 29, _formwidth + 4, _rackheight);
-            pbTopRack.BorderStyle = BorderStyle.FixedSingle;
-            this.Controls.Add(pbTopRack);
-            pbTopRack.Location = new Point(0, 0);
-            #endregion
+            //Change some picturebox settings
+            pbRack = new PictureBox();
+            pbRack.Name = "Top Rack";
+            pbRack.MouseClick += new MouseEventHandler(cellClicked);
+            pbRack.Image = rackBitmap;
+            pbRack.SetBounds(5, 29, _formwidth + 4, _rackheight);
+            pbRack.BorderStyle = BorderStyle.FixedSingle;
+            this.Controls.Add(pbRack);
+            pbRack.Location = new Point(0, 0);
 
-            #region Bottom Rack
-            //Initialize bitmap and graphics for rack
-            bottomRack = new Bitmap(_formwidth, _rackheight);
-            rackGraphics = Graphics.FromImage(bottomRack);
-            rackGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-
-
-            //Initialize arrays
-            BottomRack = new BottomRackTile[_rackrows, _rackcols];
-            counter = 0;
-
-            //Create the cells in each rack
-            for (int i = 0; i < _rackrows; i++)
-            {
-                for (int j = 0; j < _rackcols; j++)
-                {
-                    BottomRack[i, j] = new BottomRackTile();
-                    BottomRack[i, j].ID = counter;
-                    counter++;
-
-                    int num = rand.Next(0, 26); // Zero to 25
-                    char let = (char)('a' + num);
-                    BottomRack[i, j].Value = let.ToString().ToUpper();
-                }
-            }
-
-            displayRack("Bottom");
-
-            //Change some form settings
-            pbBottomRack = new PictureBox();
-            pbBottomRack.Name = "Bottom Rack";
-            pbBottomRack.MouseClick += new MouseEventHandler(cellClicked);
-            pbBottomRack.Image = bottomRack;
-            pbBottomRack.SetBounds(5, 29, _formwidth + 4, _rackheight);
-            pbBottomRack.BorderStyle = BorderStyle.FixedSingle;
-            this.Controls.Add(pbBottomRack);
-            pbBottomRack.Location = new Point(0, 675);
             #endregion
         }
 
@@ -369,10 +344,11 @@ namespace WindowsFormsApp3
         }
 
 
-        private void displayRack(string rackPosition)
+        private void renderRack()
         {
             //Clear background color
             rackGraphics.Clear(this.BackColor);
+
 
             //For loop for each cell in the rack
             for (int i = 0; i < _rackrows; i++)
@@ -385,17 +361,7 @@ namespace WindowsFormsApp3
                     int drawX = _rackx - 10 + rackW / 3;
                     int drawY = _racky + rackH / 3;
 
-                    //Switch statement to figure out from which array to retrieve letter from depending on the rack
-                    switch(rackPosition)
-                    {
-                        case "Top":
-                            rackGraphics.DrawString(TopRack[i,j].Value, myFont, Brushes.Black, drawX, drawY);
-                            break;
-
-                        case "Bottom":
-                            rackGraphics.DrawString(BottomRack[i, j].Value, myFont, Brushes.Black, drawX, drawY);
-                            break;
-                    }
+                    rackGraphics.DrawString(Racks[playerTurn][i, j].Value, myFont, Brushes.Black, drawX, drawY);
                 }
             }
 
@@ -486,26 +452,15 @@ namespace WindowsFormsApp3
                     }
                     break;
                 #endregion
-                #region Bottom Rack
-                case "Bottom Rack":
-                    //If bottomrack then retrieve value from bottomrack array
-                    row = e.Y * _rackrows / _rackheight;
-                    col = e.X * _rackcols / _formwidth;
-                    oldVal = BottomRack[row, col].Value;
-
-                    //TODO retrieve tile value
-                    letterToPlace = BottomRack[row, col].Value;
-                    break;
-                #endregion
                 #region Top Rack
                 case "Top Rack":
                     //If toprack then retrieve value from toprack array
                     row = e.Y * _rackrows / _rackheight;
                     col = e.X * _rackcols / _formwidth;
-                    oldVal = TopRack[row, col].Value;
+                    oldVal = Racks[playerTurn][row, col].Value;
 
                     //TODO retrieve tile value
-                    letterToPlace = TopRack[row, col].Value;
+                    letterToPlace = Racks[playerTurn][row, col].Value;
                     break;
                 #endregion
             }
@@ -665,15 +620,21 @@ namespace WindowsFormsApp3
 
             findOccupiedTiles();
 
-            playerOneTurn = !playerOneTurn;
-            if(playerOneTurn == true)
+
+            if(playerTurn < _numberOfPlayers - 1)
             {
-                this.Text = "Player One's Turn!";
+                playerTurn += 1;
             }
             else
             {
-                this.Text = "Player Two's Turn!";
+                playerTurn = 0;
             }
+
+
+            this.Text = String.Format("Player {0}'s Turn!", playerTurn + 1);
+
+            renderRack();
+
         }
 
 
