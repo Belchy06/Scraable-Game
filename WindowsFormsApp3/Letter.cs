@@ -8,71 +8,75 @@ namespace WindowsFormsApp3
 {
     public class Letter
     {
-        private string _letters;
-        public string Letters
-        {
-            get { return _letters; }
-            set { _letters = value; }
-        }
-
-        private int _value;
-        public int Value
+        private string _value;
+        public string Value
         {
             get { return _value; }
             set { _value = value; }
         }
 
-        public Letter(string letter)
+        private int _quantity;
+        public int Quantity
         {
-            switch (letter)
+            get { return _quantity; }
+            set { _quantity = value; }
+        }
+
+        private int _points;
+        public int Points
+        {
+            get { return _points; }
+            set { _points = value; }
+        }
+
+        public static List<Letter> letters = new List<Letter>();
+
+
+        public Letter(string letterValue, int letterPoints, int letterQuantity)
+        {
+            Value = letterValue;
+            Points = letterPoints;
+            Quantity = letterQuantity;
+        }
+
+        public static void PopulateList()
+        {
+            addLetter(9, "A", 1);
+            addLetter(2, "B", 3);
+            addLetter(2, "C", 3);
+            addLetter(4, "D", 2);
+            addLetter(12, "E", 1);
+            addLetter(2, "F", 4);
+            addLetter(3, "G", 2);
+            addLetter(2, "H", 4);
+            addLetter(9, "I", 1);
+            addLetter(1, "J", 8);
+            addLetter(5, "K", 1);
+            addLetter(4, "L", 1);
+            addLetter(2, "M", 3);
+            addLetter(6, "N", 1);
+            addLetter(8, "O", 1);
+            addLetter(2, "P", 3);
+            addLetter(1, "Q", 10);
+            addLetter(6, "R", 1);
+            addLetter(4, "S", 1);
+            addLetter(6, "T", 1);
+            addLetter(4, "U", 1);
+            addLetter(2, "V", 4);
+            addLetter(4, "W", 2);
+            addLetter(1, "X", 8);
+            addLetter(2, "Y", 4);
+            addLetter(1, "Z", 10);
+        }
+
+        public static void addLetter(int quantity, string letter, int points)
+        {
+            for(int i = 0; i < quantity; i++)
             {
-                case " ":
-                    _value = 0;
-                    break;
-                case "a":
-                case "e":
-                case "i":
-                case "o":
-                case "u":
-                case "l":
-                case "n":
-                case "s":
-                case "t":
-                case "r":
-                    _value = 1;
-                    break;
-                case "d":
-                case "g":
-                    _value = 2;
-                    break;
-                case "b":
-                case "c":
-                case "m":
-                case "p":
-                    _value = 3;
-                    break;
-                case "f":
-                case "h":
-                case "v":
-                case "w":
-                case "y":
-                    _value = 4;
-                    break;
-                case "k":
-                    _value = 5;
-                    break;
-                case "j":
-                case "x":
-                    _value = 8;
-                    break;
-                case "q":
-                case "z":
-                    _value = 10;
-                    break;
-                default:
-                    //console.out.writeline("invalid tile created!");
-                    break;
+                Letter letterToAdd = new Letter(letter, points, quantity);
+                letters.Add(letterToAdd);
             }
         }
     }
+    //https://codereview.stackexchange.com/questions/94202/populating-a-bag-of-scrabble-tiles
 }

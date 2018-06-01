@@ -20,7 +20,7 @@ namespace WindowsFormsApp3
         public static Graphics boardGraphics;
 
         private int _rows;
-        private int _cols;    
+        private int _cols;
         private int _height;
 
         private int _formwidth;
@@ -64,16 +64,17 @@ namespace WindowsFormsApp3
 
             playerTurn = 0;
 
-            Bag.PopulateTiles();
+            Letter.PopulateList();
 
             Racks = new Rack[numberOfPlayers][,];
 
             firstTurn = true;
+
             this.Text = String.Format("Player {0}'s Turn!", playerTurn + 1);
 
             setupRack(600, 75, 1, 8);
             setupBoard(600, 600, 15, 15);
-            
+
         }
 
 
@@ -93,9 +94,9 @@ namespace WindowsFormsApp3
             _height = height;
             _rows = rows;
             _cols = cols;
-	        tileW = _formwidth / _cols;
+            tileW = _formwidth / _cols;
             tileH = _height / _rows;
-	        boardBitmap = new Bitmap(_formwidth, _height);
+            boardBitmap = new Bitmap(_formwidth, _height);
             boardGraphics = Graphics.FromImage(boardBitmap);
             boardGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
@@ -103,10 +104,10 @@ namespace WindowsFormsApp3
             Tiles = new Tile[_rows, _cols];
             int counter = 0;
 
-	        //Create cells on the board
+            //Create cells on the board
             for (int i = 0; i < _rows; i++)
             {
-                for(int j = 0; j < _cols; j++)
+                for (int j = 0; j < _cols; j++)
                 {
                     Tiles[i, j] = new Tile();
                     Tiles[i, j].ID = counter;
@@ -159,7 +160,7 @@ namespace WindowsFormsApp3
             rackGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             //Initialize arrays
-            Racks = new Rack[numberOfPlayers][,];        
+            Racks = new Rack[numberOfPlayers][,];
 
             //For each player, create the rows and columns in each players rack
             for (int p = 0; p < numberOfPlayers; p++)
@@ -176,11 +177,10 @@ namespace WindowsFormsApp3
                         Racks[p][i, j].ID = counter;
                         counter++;
 
-                        int num = rand.Next(0, 26);
-                        char let = (char)('a' + num);
-                        Racks[p][i, j].Value = let.ToString().ToUpper();
+                        Racks[p][i, j].Value = getRandomLetter();
+                         
                     }
-                } 
+                }
             }
 
             renderRack();
@@ -323,7 +323,7 @@ namespace WindowsFormsApp3
                             //Draw and fill star
                             boardGraphics.FillPolygon(Brushes.Black, starPoints);
                             break;
-                        #endregion
+                            #endregion
                     }
                 }
             }
@@ -361,7 +361,15 @@ namespace WindowsFormsApp3
                     int drawX = _rackx - 10 + rackW / 3;
                     int drawY = _racky + rackH / 3;
 
-                    rackGraphics.DrawString(Racks[playerTurn][i, j].Value, myFont, Brushes.Black, drawX, drawY);
+                    if((Racks[playerTurn][i, j].Value != null))
+                    {
+                        rackGraphics.DrawString(Racks[playerTurn][i, j].Value, myFont, Brushes.Black, drawX, drawY);
+                    }
+                    else
+                    {
+                        rackGraphics.FillRectangle(Brushes.Red, _rackx, _racky, rackW, rackH);
+                    }
+                    
                 }
             }
 
@@ -384,9 +392,9 @@ namespace WindowsFormsApp3
         private void placeLetter(int letterRow, int letterCol)
         {
             //Retrieve the letter that needs to be rendered
-            letterToPlace = Tiles[letterRow,letterCol].Value;
+            letterToPlace = Tiles[letterRow, letterCol].Value;
             Tiles[letterRow, letterCol].Occupied = true;
-            
+
             //Maths to solve x and y position of the letter
             int _letterx = letterCol * tileW;
             int _lettery = letterRow * tileH;
@@ -398,8 +406,8 @@ namespace WindowsFormsApp3
                 //Fill rectangle behind the letter and then render the letter onto this rectangle
                 boardGraphics.FillRectangle(customBrush, _letterx, _lettery, tileW, tileH);
                 boardGraphics.DrawString(letterToPlace, myFont, Brushes.Black, drawX, drawY);
-                pbBoard.Image = boardBitmap; 
-            } 
+                pbBoard.Image = boardBitmap;
+            }
             else
             {
                 MessageBox.Show("There is already a letter on that tile!");
@@ -432,7 +440,7 @@ namespace WindowsFormsApp3
                 #region Main Board
                 case "Main Board":
                     //If main board, execute another switch to see which mouse button was clicked and execute code
-                    switch(e.Button)
+                    switch (e.Button)
                     {
                         case MouseButtons.Right:
                             //Render the default look of the cell, whether this is a default, or special tiles does not matter
@@ -461,8 +469,9 @@ namespace WindowsFormsApp3
 
                     //TODO retrieve tile value
                     letterToPlace = Racks[playerTurn][row, col].Value;
+                    Racks[playerTurn][row, col].Value = null;
                     break;
-                #endregion
+                    #endregion
             }
         }
 
@@ -588,7 +597,7 @@ namespace WindowsFormsApp3
                 default:
                     boardGraphics.FillRectangle(customBrush, _x, _y, tileW, tileH);
                     break;
-                #endregion
+                    #endregion
             }
 
             //Draw Gridlines
@@ -609,9 +618,9 @@ namespace WindowsFormsApp3
 
         private void endTurn()
         {
-            if(firstTurn == true)
+            if (firstTurn == true)
             {
-                if(Tiles[7,7].Occupied ==false)
+                if (Tiles[7, 7].Occupied == false)
                 {
                     MessageBox.Show("Make sure the center tile is occupied on the first turn", "Center Tile not occupied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
@@ -620,8 +629,9 @@ namespace WindowsFormsApp3
 
             findOccupiedTiles();
 
+            refreshRack();
 
-            if(playerTurn < _numberOfPlayers - 1)
+            if (playerTurn < _numberOfPlayers - 1)
             {
                 playerTurn += 1;
             }
@@ -644,7 +654,7 @@ namespace WindowsFormsApp3
             {
                 for (int j = 0; j < _cols; j++)
                 {
-                    if(Tiles[i,j].Occupied == true)
+                    if (Tiles[i, j].Occupied == true)
                     {
                         Tiles[i, j].Editable = false;
                     }
@@ -656,6 +666,38 @@ namespace WindowsFormsApp3
         private void btnEndTurn_Click(object sender, EventArgs e)
         {
             endTurn();
+        }
+
+
+        private void refreshRack()
+        {
+            for (int i = 0; i < _rackrows; i++)
+            {
+                for (int j = 0; j < _rackcols; j++)
+                {
+                    if (Racks[playerTurn][i, j].Value == null)
+                    {
+                        Racks[playerTurn][i, j].Value = getRandomLetter();
+                    }
+                }
+            }
+        }
+
+        private string getRandomLetter()
+        {
+            string randomLetter;
+            if (Letter.letters.Count > 0)
+            {
+                int num = rand.Next(Letter.letters.Count);
+                randomLetter = Letter.letters[num].Value.ToString();
+                Letter.letters.RemoveAt(num); 
+            } 
+            else
+            {
+                randomLetter = null;
+            }
+
+            return randomLetter;
         }
     }
 }

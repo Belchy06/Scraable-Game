@@ -20,7 +20,6 @@ C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\bin\Debug\Window
 C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\bin\Debug\WindowsFormsApp3.exe
 C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\bin\Debug\WindowsFormsApp3.pdb
 C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.csprojAssemblyReference.cache
-C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.Form1.resources
 C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.Properties.Resources.resources
 C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.csproj.GenerateResource.cache
 C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.csproj.CoreCompileInputs.cache
@@ -28,3 +27,5 @@ C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\Window
 C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.pdb
 J:\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.frmGame.resources
 J:\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.frmSettings.resources
+C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.frmGame.resources
+C:\Users\Will\Desktop\USB\IPT\WindowsFormsApp3\WindowsFormsApp3\obj\Debug\WindowsFormsApp3.frmSettings.resources
