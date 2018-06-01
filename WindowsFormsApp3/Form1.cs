@@ -36,7 +36,7 @@ namespace WindowsFormsApp3
         private int rackH;
 
         private Rack[][,] Racks;
-        private Tile[,] Tiles;
+        public static Tile[,] Tiles;
 
         public static List<Tile> editedTiles = new List<Tile>();
 
@@ -114,6 +114,7 @@ namespace WindowsFormsApp3
                     Tiles[i, j] = new Tile();
                     Tiles[i, j].ID = counter;
                     Tiles[i, j].Value = null;
+                    Tiles[i, j].Position = new Point(j, i);
                     counter++;
                 }
             }
@@ -631,7 +632,8 @@ namespace WindowsFormsApp3
 
             findOccupiedTiles();
 
-            SearchAlgorithm.search(editedTiles);
+            SearchAlgorithm.Search(editedTiles);
+
 
             editedTiles.Clear();
             #region player info

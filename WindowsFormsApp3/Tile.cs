@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Drawing;
 
 namespace WindowsFormsApp3
 {
@@ -12,6 +14,7 @@ namespace WindowsFormsApp3
         {
             Occupied = false;
             Editable = true;
+            
         }
 
         private string _value;
@@ -40,6 +43,13 @@ namespace WindowsFormsApp3
         {
             get { return _isOccupied; }
             set { _isOccupied = value; }
+        }
+
+        private Point _position;
+        public Point Position
+        {
+            get { return _position; }
+            set { _position = value; }
         }
     }
 }
