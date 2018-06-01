@@ -632,8 +632,19 @@ namespace WindowsFormsApp3
 
             findOccupiedTiles();
 
-            SearchAlgorithm.Search(editedTiles);
+            List<string> boardWords = SearchAlgorithm.Search(editedTiles);
 
+            foreach(string boardWord in boardWords)
+            {
+                if(Dictionary.checkValidity(boardWord) == false)
+                {
+                    MessageBox.Show(boardWord + " is not a valid word!", " ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+            }
+
+            boardWords.Clear();
+            
 
             editedTiles.Clear();
             #region player info

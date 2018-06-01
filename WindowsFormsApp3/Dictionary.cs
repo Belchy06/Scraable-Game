@@ -10,7 +10,7 @@ namespace WindowsFormsApp3
 {
     public static class Dictionary
     {
-        public static List<string> words = new List<string>();
+        public static List<string> dictionaryWords = new List<string>();
 
         public static void loadDictionary()
         {
@@ -40,12 +40,13 @@ namespace WindowsFormsApp3
                     {
                         using (StreamReader sr = new StreamReader(myStream))
                         {
+                            string line;
+                            while((line = sr.ReadLine()) != null)
+                            {
+                                dictionaryWords.Add(line);
+                            }
                             // Insert code to read the stream here. 
-                            words.Add(sr.ReadLine());
-                        }
-                        foreach (string word in words)
-                        {
-                            Console.Out.WriteLine(word);
+                            
                         }
                     }
                 }
@@ -55,6 +56,20 @@ namespace WindowsFormsApp3
                 }
 
             }
+        }
+
+        public static bool checkValidity(string boardWord)
+        {
+            if(dictionaryWords.Contains(boardWord, StringComparer.OrdinalIgnoreCase) == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+            
         }
     }
 }

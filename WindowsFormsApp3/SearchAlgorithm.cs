@@ -11,7 +11,10 @@ namespace WindowsFormsApp3
     {
         public static int rootX;
         public static int rootY;
-        public static List<Root> roots = new List<Root>();
+
+        public static List<Point> rootPositions = new List<Point>();
+
+        public static List<string> words = new List<string>();
 
         public static string word;
 
@@ -19,11 +22,10 @@ namespace WindowsFormsApp3
 
         public static List<string> Search(List<Tile> editedTiles)
         {
-            List<string> words = new List<string>();
+            
             #region Find Root
             foreach (Tile tile in editedTiles)
             {
-                bool updown = true;
 
                 int x = tile.Position.X;
                 int y = tile.Position.Y;
@@ -31,61 +33,83 @@ namespace WindowsFormsApp3
                 int tmpX = tile.Position.X;
                 int tmpY = tile.Position.Y;
 
-                //search to the left
-                while (frmGame.Tiles[tmpY, tmpX - 1].Value != null)
+                if (frmGame.Tiles[y, x - 1].Value != null)
                 {
-                    tmpX -= 1;
-                    updown = false;
+                    while (frmGame.Tiles[tmpY, tmpX].Value != null)
+                    {
+                        tmpX -= 1;
+                    }
                 }
 
-                rootX = tmpX;
+                //Point rootPoint = new Point(tmpX, tmpY);
+                
+                //if(!(rootPositions.Contains(rootPoint)))
+                //{
+                //    rootPositions.Add(rootPoint);
+                //}
 
-                //search down
-                while (frmGame.Tiles[tmpY - 1, tmpX].Value != null)
+                //tmpX = x;
+                //tmpY = y;
+
+                if (frmGame.Tiles[y - 1, x].Value != null)
                 {
-                    tmpY -= 1;
-                    updown = true;
+                    while (frmGame.Tiles[tmpY - 1, tmpX].Value != null)
+                    {
+                        //updown = true;
+                        tmpY -= 1;
+                    }
                 }
-
-                rootY = tmpY;
 
                 Point rootPoint = new Point(tmpX, tmpY);
 
-                Root root = new Root(rootPoint, updown);
-
-                int index = roots.FindIndex(rootPos => root.Position.X == tmpX && root.Position.Y == tmpY);
-                if(!(index >= 0))
+                if (!(rootPositions.Contains(rootPoint)))
                 {
-                    roots.Add(root);
+                    rootPositions.Add(rootPoint);
                 }
             } 
 
             #endregion
 
-            foreach(Root root in roots)
+            foreach(Point position in rootPositions)
             {
-                int x = root.Position.X;
-                int y = root.Position.Y;
-                bool updown = root.UpDown;
+                int x = position.X;
+                int tmpX = x;
+                int y = position.Y;
+                int tmpY = y;
                 
-                while(frmGame.Tiles[y,x].Value != null)
+                if(frmGame.Tiles[tmpY, tmpX + 1].Value != null)
                 {
-                    word += frmGame.Tiles[y, x].Value;
-
-                    if(updown == true)
+                    while (frmGame.Tiles[tmpY, tmpX].Value != null)
                     {
-                        y += 1;
-                    }
-                    else
-                    {
-                        x += 1;
+                        word += frmGame.Tiles[tmpY, tmpX].Value;
+                        tmpX += 1;
                     }
                 }
 
-                words.Add(word);
+                if(word != null)
+                {
+                    words.Add(word);
+                    word = null;
+                }
+
+                if (frmGame.Tiles[tmpY + 1, tmpX].Value != null)
+                {
+                    while (frmGame.Tiles[tmpY, tmpX].Value != null)
+                    {
+                        word += frmGame.Tiles[tmpY, tmpX].Value;
+                        tmpY += 1;
+                    }
+                }
+
+                if (word != null)
+                {
+                    words.Add(word);
+                    word = null;
+                }
 
             }
 
+            rootPositions.Clear();
             return words;
         }
     }
