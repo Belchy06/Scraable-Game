@@ -7,11 +7,12 @@ using System.Drawing;
 
 namespace WindowsFormsApp3
 {
-    public static class SearchAlgorithm
+    public class SearchAlgorithm
     {
         public static int rootX;
         public static int rootY;
 
+        // Root info TODO: Make class
         public static List<Point> rootPositions = new List<Point>();
 
         public static List<string> words = new List<string>();
@@ -22,118 +23,172 @@ namespace WindowsFormsApp3
 
         public static List<string> Search(List<Tile> editedTiles)
         {
-            
+
             #region Find Root
+            findHorizontalRoot(editedTiles);
+            findVerticalRoot(editedTiles);
+            #endregion
+
+
+            //rootPositions.Clear();
+            //foreach (Point position in rootPositions)
+            //{
+            //    int x = position.X; // initial root x position
+
+            //    int y = position.Y; // initial root y position
+
+            //    // if tile to the right has letter
+            //    if (frmGame.Tiles[y, x + 1].Value != null)
+            //    {
+            //        searchRight(x, y);
+            //    }
+
+            //    // if the tile down has a letter
+            //    if (frmGame.Tiles[y + 1, x].Value != null)
+            //    {
+            //        searchDown(x, y);
+            //    }
+            //}
+
+            return words;
+            
+        }
+
+        public static void searchRight(int x, int y)
+        {
+            //While the tile is not empty
+            while (frmGame.Tiles[y, x].Value != null)
+            {
+                // add the value of the current tile to word
+                word += frmGame.Tiles[y, x].Value;
+
+                //move right 1 tile
+                x += 1;
+            }
+
+            // add word to list of words
+            words.Add(word);
+
+            // reset value of word
+            word = null;
+        }
+
+        public static void searchDown(int x, int y)
+        {
+            //While the tile is not empty
+            while (frmGame.Tiles[y, x].Value != null)
+            {
+                // add the value of the current tile to word
+                word += frmGame.Tiles[y, x].Value;
+
+                //move down 1 tile
+                y += 1;
+            }
+
+            // add word to list of words
+            words.Add(word);
+
+            // reset value of word
+            word = null;
+        }
+
+        public static void findHorizontalRoot(List<Tile> editedTiles)
+        {
+            bool across = false;
+            int searchX = 0;
+            int searchY = 0;
+
             foreach (Tile tile in editedTiles)
             {
+                across = false;
+                // initalize variable
+                int x = tile.Position.X; // inital x
+                int y = tile.Position.Y; // inital y
 
-                int x = tile.Position.X;
-                int y = tile.Position.Y;
+                int tmpX = tile.Position.X; // editable x
+                int tmpY = tile.Position.Y; // editable y
 
-                int tmpX = tile.Position.X;
-                int tmpY = tile.Position.Y;
-
+                // if tile to the left has a letter
                 if (frmGame.Tiles[y, x - 1].Value != null)
                 {
-                    while (frmGame.Tiles[tmpY, tmpX].Value != null)
+                    // move to the left tile until ladning on root letter
+                    while (frmGame.Tiles[tmpY, tmpX - 1].Value != null)
                     {
                         tmpX -= 1;
+                        across = true;
                     }
                 }
 
-                //Point rootPoint = new Point(tmpX, tmpY);
-                
-                //if(!(rootPositions.Contains(rootPoint)))
-                //{
-                //    rootPositions.Add(rootPoint);
-                //}
-
-                //tmpX = x;
-                //tmpY = y;
-
-                if (frmGame.Tiles[y - 1, x].Value != null)
-                {
-                    while (frmGame.Tiles[tmpY - 1, tmpX].Value != null)
-                    {
-                        //updown = true;
-                        tmpY -= 1;
-                    }
-                }
+                searchX = tmpX;
+                searchY = tmpY;
 
                 Point rootPoint = new Point(tmpX, tmpY);
 
-                if (!(rootPositions.Contains(rootPoint)))
+                if (across)
                 {
-                    rootPositions.Add(rootPoint);
+                    if (!(rootPositions.Contains(rootPoint)))
+                    {
+                        rootPositions.Add(rootPoint);
+                        searchRight(searchX, searchY);
+                    } 
                 }
-            } 
 
-            #endregion
-
-            foreach(Point position in rootPositions)
-            {
-                int x = position.X;
-                int tmpX = x;
-                int y = position.Y;
-                int tmpY = y;
                 
-                if(frmGame.Tiles[tmpY, tmpX + 1].Value != null)
-                {
-                    while (frmGame.Tiles[tmpY, tmpX].Value != null)
-                    {
-                        word += frmGame.Tiles[tmpY, tmpX].Value;
-                        tmpX += 1;
-                    }
-                }
-
-                if(word != null)
-                {
-                    words.Add(word);
-                    word = null;
-                }
-
-                if (frmGame.Tiles[tmpY + 1, tmpX].Value != null)
-                {
-                    while (frmGame.Tiles[tmpY, tmpX].Value != null)
-                    {
-                        word += frmGame.Tiles[tmpY, tmpX].Value;
-                        tmpY += 1;
-                    }
-                }
-
-                if (word != null)
-                {
-                    words.Add(word);
-                    word = null;
-                }
-
             }
 
             rootPositions.Clear();
-            return words;
-        }
-    }
-
-    public class Root
-    {
-        public Root(Point rootPosition, Boolean rootUpDown)
-        {
-            Position = rootPosition;
-            UpDown = rootUpDown;
+            //if (across)
+            //{
+            //    searchRight(searchX, searchY);
+            //}
         }
 
-        private bool _updown;
-        public bool UpDown
+        public static void findVerticalRoot(List<Tile> editedTiles)
         {
-            get { return _updown; }
-            set { _updown = value; }
-        }
+            bool up = false;
+            int searchX = 0;
+            int searchY = 0;
 
-        private Point _position;
-        public Point Position
-        {
-            get { return _position; }
-            set { _position = value; }
+            foreach (Tile tile in editedTiles)
+            {
+                up = false;
+                int x = tile.Position.X; // inital x
+                int y = tile.Position.Y; // inital y
+
+                int tmpX = tile.Position.X; // editable x
+                int tmpY = tile.Position.Y; // editable y
+
+                // if upper tile has a letter
+                if (frmGame.Tiles[y - 1, x].Value != null)
+                {
+                    // move to the upper tile
+                    while (frmGame.Tiles[tmpY - 1, tmpX].Value != null)
+                    {
+                        tmpY -= 1;
+                        up = true;
+                    }
+                }
+
+                searchX = tmpX;
+                searchY = tmpY;
+
+                Point rootPoint = new Point(tmpX, tmpY);
+
+                if (up)
+                {
+                    if (!(rootPositions.Contains(rootPoint)))
+                    {
+                        rootPositions.Add(rootPoint);
+                        searchDown(searchX, searchY);
+                    } 
+                }
+            }
+
+            rootPositions.Clear();
+            //if (up)
+            //{
+            //    searchDown(searchX, searchY);
+            //}
         }
     }
 }

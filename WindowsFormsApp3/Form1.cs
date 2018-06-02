@@ -643,7 +643,8 @@ namespace WindowsFormsApp3
 
             }
 
-            boardWords.Clear();
+            SearchAlgorithm.words.Clear();
+            //boardWords.Clear();
             
 
             editedTiles.Clear();
