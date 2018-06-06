@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace WindowsFormsApp3
 {
@@ -54,15 +55,20 @@ namespace WindowsFormsApp3
 
         private string letterToPlace;
 
+        public static bool load;
+
         static Color customColour = Color.FromArgb(240, 240, 240);
         SolidBrush customBrush = new SolidBrush(customColour);
 
         Font myFont = new Font("Arial", 15, FontStyle.Bold, GraphicsUnit.Pixel);
         #endregion
 
+
         public frmGame()
         {
             InitializeComponent();
+
+            load = frmSettings.load;
 
             playerTurn = 0;
 
@@ -76,7 +82,6 @@ namespace WindowsFormsApp3
 
             setupRack(600, 75, 1, 8);
             setupBoard(600, 600, 15, 15);
-
         }
 
 
@@ -117,6 +122,11 @@ namespace WindowsFormsApp3
                     Tiles[i, j].Position = new Point(j, i);
                     counter++;
                 }
+            }
+
+            if(load)
+            {
+                loadFile();
             }
 
             renderTiles();
@@ -328,8 +338,15 @@ namespace WindowsFormsApp3
                             break;
                             #endregion
                     }
+
+                    if(Tiles[i,j].Value != null)
+                    {
+                        boardGraphics.FillRectangle(customBrush, _x, _y, tileW, tileH);
+                        boardGraphics.DrawString(Tiles[i, j].Value, myFont, Brushes.Black, drawX, drawY);
+                    }
                 }
-            }
+            }          
+
 
             //Draw grid lines
             for (int i = 0; i <= _rows; i++)
@@ -621,34 +638,6 @@ namespace WindowsFormsApp3
 
         private void endTurn()
         {
-            if (firstTurn == true)
-            {
-                if (Tiles[7, 7].Occupied == false)
-                {
-                    MessageBox.Show("Make sure the center tile is occupied on the first turn", "Center Tile not occupied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-
-
-            findOccupiedTiles();
-
-            List<string> boardWords = SearchAlgorithm.Search(editedTiles);
-
-            foreach(string boardWord in boardWords)
-            {
-                if(Dictionary.checkValidity(boardWord) == false)
-                {
-                    MessageBox.Show(boardWord + " is not a valid word!", " ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-
-            }
-
-            SearchAlgorithm.words.Clear();
-            //boardWords.Clear();
-            
-
-            editedTiles.Clear();
-            #region player info
             refreshRack();
 
             if (playerTurn < _numberOfPlayers - 1)
@@ -660,11 +649,9 @@ namespace WindowsFormsApp3
                 playerTurn = 0;
             }
 
-
             this.Text = String.Format("Player {0}'s Turn!", playerTurn + 1);
 
             renderRack();
-            #endregion
         }
 
 
@@ -686,7 +673,35 @@ namespace WindowsFormsApp3
 
         private void btnEndTurn_Click(object sender, EventArgs e)
         {
-            endTurn();
+            bool noErrors = true;
+
+            if (firstTurn == true)
+            {
+                if (Tiles[7, 7].Occupied == false)
+                {
+                    MessageBox.Show("Make sure the center tile is occupied on the first turn", "Center Tile not occupied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+
+            findOccupiedTiles();
+            List<string> boardWords = SearchAlgorithm.Search(editedTiles);
+
+            foreach (string boardWord in boardWords)
+            {
+                if (Dictionary.checkValidity(boardWord) == false)
+                {
+                    MessageBox.Show(boardWord + " is not a valid word!", " ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    noErrors = false;
+                }
+            }
+
+            if(noErrors)
+            {
+                endTurn();
+            }
+
+            SearchAlgorithm.words.Clear();
+            editedTiles.Clear();
         }
 
 
@@ -720,6 +735,179 @@ namespace WindowsFormsApp3
             }
 
             return randomLetter;
+        }
+    
+
+        private void saveToFile()
+        {
+            SaveFileDialog saveDialog = new SaveFileDialog();
+            saveDialog.Filter = "txt files (*.txt)|*.txt";
+            saveDialog.FilterIndex = 1;
+
+            if (saveDialog.ShowDialog() == DialogResult.OK)
+            {
+                StreamWriter sw = new StreamWriter(saveDialog.FileName, false);
+                for(int i = 0; i < _rows; i++)
+                {
+                    for(int j = 0; j < _cols; j++)
+                    {
+                        if(Tiles[i, j].Value != null)
+                        {
+                            sw.WriteLine("t " + Tiles[i, j].Value);
+                        }
+                        else
+                        {
+                            sw.WriteLine("t _");
+                        }
+                    }
+                }
+
+                
+
+                for (int p = 0; p < numberOfPlayers; p++)
+                {
+                    sw.Write("r ");
+                    for (int i = 0; i < _rackrows; i++)
+                    {
+                        for (int j = 0; j < _rackcols; j++)
+                        {
+                            sw.Write(Racks[p][i, j].Value + " ");
+                        }
+                    }
+                    sw.Write(Environment.NewLine);
+                }
+
+                sw.WriteLine("p " + numberOfPlayers.ToString());
+                sw.WriteLine("u " + playerTurn.ToString());
+
+                sw.Write("l ");
+                foreach(Letter letter in Letter.letters)
+                {
+                    sw.Write(letter.Value + " ");
+                }
+                sw.Write(Environment.NewLine);
+                sw.Close();
+            }
+        }
+
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            saveToFile();
+        }
+
+
+        private void loadFile()
+        {
+            // Create new dialog to open file, list of tile values and array of rack with their values
+            OpenFileDialog openFile = new OpenFileDialog();
+            List<string> tiles = new List<string>();
+            List<string>[] rackValues = new List<string>[4];
+
+            // If the user clicks ok on the dialog
+            if(openFile.ShowDialog() == DialogResult.OK)
+            {
+                // create new streamreader with the filename of the save and no encryption used
+                StreamReader sr = new StreamReader(openFile.FileName, false);
+
+                int rackIndex = 0;
+
+                #region parse data
+                while (true)
+                {
+                    string line = sr.ReadLine();
+
+                    if (line.StartsWith("t "))
+                    {
+                        string[] currentLine = line.Split(' ');
+                        string letter = currentLine[1];
+                        tiles.Add(letter);
+                    }
+                    else if (line.StartsWith("r "))
+                    {
+                        string[] currentLine = line.Split(' ');
+                        rackValues[rackIndex] = new List<string>();
+                        for (int i = 0; i < 8; i++)
+                        {
+                            rackValues[rackIndex].Add(currentLine[i + 1]);
+                        }
+                        rackIndex++;
+                    }
+                    else if (line.StartsWith("p "))
+                    {
+                        string[] currentLine = line.Split(' ');
+                        numberOfPlayers = Int32.Parse(currentLine[1]);
+                    }
+                    else if (line.StartsWith("u "))
+                    {
+                        string[] currentLine = line.Split(' ');
+                        playerTurn = Int32.Parse(currentLine[1]);
+                    }
+                    else if(line.StartsWith("l "))
+                    {
+                        Letter.letters.Clear();
+                        string[] currentLine = line.Split(' ');
+                        for(int i = 0; i < currentLine.Length - 1; i++)
+                        {
+                            Letter letterToAdd = new Letter(currentLine[i + 1]);
+                            Letter.letters.Add(letterToAdd);
+                        }    
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                #endregion
+
+
+                #region Assign passed data to various values
+                int index = 0;
+                for (int i = 0; i < _rows; i++)
+                {
+                    for (int j = 0; j < _cols; j++)
+                    {
+                        string letter = tiles[index];
+                        if(letter != "_")
+                        {
+                            Tiles[i, j].Value = letter;
+                        }
+                        else
+                        {
+                            Tiles[i, j].Value = null;
+                        }
+                        index++;
+                    }
+                }
+                #endregion
+
+
+                #region assign values to racks               
+                for(int p = 0; p < rackValues.Length; p++)
+                {
+                    int letterIndex = 0;
+
+                    for (int i = 0; i < _rackrows; i++)
+                    {
+                        for (int j = 0; j < _rackcols; j++)
+                        {
+                            string letter = rackValues[p][letterIndex];
+                            Racks[p][i, j].Value = letter;
+                            letterIndex++;
+                        }
+                    }
+                }
+                renderRack();
+                #endregion
+            }
+
+
+        }
+
+
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            loadFile();
         }
     }
 }

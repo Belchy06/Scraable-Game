@@ -12,7 +12,6 @@ namespace WindowsFormsApp3
         public static int rootX;
         public static int rootY;
 
-        // Root info TODO: Make class
         public static List<Point> rootPositions = new List<Point>();
 
         public static List<string> words = new List<string>();
@@ -63,7 +62,10 @@ namespace WindowsFormsApp3
                 word += frmGame.Tiles[y, x].Value;
 
                 //move right 1 tile
-                x += 1;
+                if(x < 14)
+                {
+                    x += 1;
+                }     
             }
 
             // add word to list of words
@@ -82,7 +84,10 @@ namespace WindowsFormsApp3
                 word += frmGame.Tiles[y, x].Value;
 
                 //move down 1 tile
-                y += 1;
+                if(y < 14)
+                {
+                    y += 1;
+                }    
             }
 
             // add word to list of words
@@ -185,10 +190,6 @@ namespace WindowsFormsApp3
             }
 
             rootPositions.Clear();
-            //if (up)
-            //{
-            //    searchDown(searchX, searchY);
-            //}
         }
     }
 }

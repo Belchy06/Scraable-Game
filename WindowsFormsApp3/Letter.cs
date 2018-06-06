@@ -32,11 +32,97 @@ namespace WindowsFormsApp3
         public static List<Letter> letters = new List<Letter>();
 
 
-        public Letter(string letterValue, int letterPoints, int letterQuantity)
+        public Letter(string letterValue, int letterPoints)
         {
             Value = letterValue;
             Points = letterPoints;
-            Quantity = letterQuantity;
+        }
+
+        public Letter(string letterValue)
+        {
+            Value = letterValue;
+
+            switch(Value)
+            {
+                case "A":
+                    Points = 1;
+                    break;
+                case "B":
+                    Points = 3;
+                    break;
+                case "C":
+                    Points = 3;
+                    break;
+                case "D":
+                    Points = 2;
+                    break;
+                case "E":
+                    Points = 1;
+                    break;
+                case "F":
+                    Points = 4;
+                    break;
+                case "G":
+                    Points = 2;
+                    break;
+                case "H":
+                    Points = 4;
+                    break;
+                case "I":
+                    Points = 1;
+                    break;
+                case "J":
+                    Points = 8;
+                    break;
+                case "K":
+                    Points = 5;
+                    break;
+                case "L":
+                    Points = 1;
+                    break;
+                case "M":
+                    Points = 3;
+                    break;
+                case "N":
+                    Points = 1;
+                    break;
+                case "O":
+                    Points = 1;
+                    break;
+                case "P":
+                    Points = 3;
+                    break;
+                case "Q":
+                    Points = 10;
+                    break;
+                case "R":
+                    Points = 1;
+                    break;
+                case "S":
+                    Points = 1;
+                    break;
+                case "T":
+                    Points = 1;
+                    break;
+                case "U":
+                    Points = 1;
+                    break;
+                case "V":
+                    Points = 4;
+                    break;
+                case "W":
+                    Points = 4;
+                    break;
+                case "X":
+                    Points = 8;
+                    break;
+                case "Y":
+                    Points = 4;
+                    break;
+                case "Z":
+                    Points = 10;
+                    break;
+            }
         }
 
         public static void PopulateList()
@@ -51,7 +137,7 @@ namespace WindowsFormsApp3
             addLetter(2, "H", 4);
             addLetter(9, "I", 1);
             addLetter(1, "J", 8);
-            addLetter(5, "K", 1);
+            addLetter(1, "K", 5);
             addLetter(4, "L", 1);
             addLetter(2, "M", 3);
             addLetter(6, "N", 1);
@@ -73,7 +159,7 @@ namespace WindowsFormsApp3
         {
             for(int i = 0; i < quantity; i++)
             {
-                Letter letterToAdd = new Letter(letter, points, quantity);
+                Letter letterToAdd = new Letter(letter, points);
                 letters.Add(letterToAdd);
             }
         }
