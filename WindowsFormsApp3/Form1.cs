@@ -172,31 +172,35 @@ namespace WindowsFormsApp3
             rackGraphics = Graphics.FromImage(rackBitmap);
             rackGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            //Initialize arrays
-            Racks = new Rack[numberOfPlayers][,];
-
-            //For each player, create the rows and columns in each players rack
-            for (int p = 0; p < numberOfPlayers; p++)
+            if (!load)
             {
-                int counter = 0;
-                Racks[p] = new Rack[_rackrows, _rackcols];
-                for (int i = 0; i < _rackrows; i++)
+                //Initialize arrays
+                Racks = new Rack[numberOfPlayers][,];
+
+                //For each player, create the rows and columns in each players rack
+                for (int p = 0; p < numberOfPlayers; p++)
                 {
-                    for (int j = 0; j < _rackcols; j++)
+                    int counter = 0;
+                    Racks[p] = new Rack[_rackrows, _rackcols];
+                    for (int i = 0; i < _rackrows; i++)
                     {
-                        Racks[p][i, j] = new Rack();
-                        Racks[p][i, j].Name = "Player: " + p.ToString();
+                        for (int j = 0; j < _rackcols; j++)
+                        {
+                            Racks[p][i, j] = new Rack();
+                            Racks[p][i, j].Name = "Player: " + p.ToString();
 
-                        Racks[p][i, j].ID = counter;
-                        counter++;
+                            Racks[p][i, j].ID = counter;
+                            counter++;
 
-                        Racks[p][i, j].Value = getRandomLetter();
-                         
+                            Racks[p][i, j].Value = getRandomLetter();
+
+                        }
                     }
                 }
+                renderRack();
             }
 
-            renderRack();
+            
 
             //Change some picturebox settings
             pbRack = new PictureBox();
@@ -370,28 +374,30 @@ namespace WindowsFormsApp3
             rackGraphics.Clear(this.BackColor);
 
 
-            //For loop for each cell in the rack
-            for (int i = 0; i < _rackrows; i++)
-            {
-                for (int j = 0; j < _rackcols; j++)
-                {
-                    //Maths to solve x and y position of each letter in the rack
-                    int _rackx = j * rackW;
-                    int _racky = i * rackH;
-                    int drawX = _rackx - 10 + rackW / 3;
-                    int drawY = _racky + rackH / 3;
 
-                    if((Racks[playerTurn][i, j].Value != null))
+                //For loop for each cell in the rack
+                for (int i = 0; i < _rackrows; i++)
+                {
+                    for (int j = 0; j < _rackcols; j++)
                     {
-                        rackGraphics.DrawString(Racks[playerTurn][i, j].Value, myFont, Brushes.Black, drawX, drawY);
+                        //Maths to solve x and y position of each letter in the rack
+                        int _rackx = j * rackW;
+                        int _racky = i * rackH;
+                        int drawX = _rackx - 10 + rackW / 3;
+                        int drawY = _racky + rackH / 3;
+
+                        if ((Racks[playerTurn][i, j].Value != null))
+                        {
+                            rackGraphics.DrawString(Racks[playerTurn][i, j].Value, myFont, Brushes.Black, drawX, drawY);
+                        }
+                        else
+                        {
+                            rackGraphics.FillRectangle(Brushes.Red, _rackx, _racky, rackW, rackH);
+                        }
+
                     }
-                    else
-                    {
-                        rackGraphics.FillRectangle(Brushes.Red, _rackx, _racky, rackW, rackH);
-                    }
-                    
-                }
-            }
+                } 
+            
 
             //Draw grid lines
             for (int i = 0; i <= _rackrows; i++)
@@ -683,6 +689,8 @@ namespace WindowsFormsApp3
                 }
             }
 
+            firstTurn = false;
+
             findOccupiedTiles();
             List<string> boardWords = SearchAlgorithm.Search(editedTiles);
 
@@ -786,6 +794,14 @@ namespace WindowsFormsApp3
                     sw.Write(letter.Value + " ");
                 }
                 sw.Write(Environment.NewLine);
+                if (firstTurn == true)
+                {
+                    sw.WriteLine("ft " + "t");
+                }
+                else
+                {
+                    sw.WriteLine("ft " + "f");
+                }
                 sw.Close();
             }
         }
@@ -813,7 +829,7 @@ namespace WindowsFormsApp3
                 int rackIndex = 0;
 
                 #region parse data
-                while (true)
+                while (! sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
 
@@ -842,6 +858,7 @@ namespace WindowsFormsApp3
                     {
                         string[] currentLine = line.Split(' ');
                         playerTurn = Int32.Parse(currentLine[1]);
+                        this.Text = String.Format("Player {0}'s Turn!", playerTurn + 1);
                     }
                     else if(line.StartsWith("l "))
                     {
@@ -851,7 +868,19 @@ namespace WindowsFormsApp3
                         {
                             Letter letterToAdd = new Letter(currentLine[i + 1]);
                             Letter.letters.Add(letterToAdd);
-                        }    
+                        }
+                    }
+                    else if (line.StartsWith("ft "))
+                    {
+                        string[] currentLine = line.Split(' ');
+                        if(currentLine[1] == "t")
+                        {
+                            firstTurn = true;
+                        }
+                        else
+                        {
+                            firstTurn = false;
+                        }
                     }
                     else
                     {
@@ -883,20 +912,34 @@ namespace WindowsFormsApp3
 
 
                 #region assign values to racks               
-                for(int p = 0; p < rackValues.Length; p++)
+                Racks = new Rack[numberOfPlayers][,];
+
+                //For each player, create the rows and columns in each players rack
+                for (int p = 0; p < numberOfPlayers; p++)
                 {
+                    int counter = 0;
                     int letterIndex = 0;
+                    Racks[p] = new Rack[_rackrows, _rackcols];
 
                     for (int i = 0; i < _rackrows; i++)
                     {
                         for (int j = 0; j < _rackcols; j++)
                         {
+                            Racks[p][i, j] = new Rack();
+
+                            Racks[p][i, j].Name = "Player: " + p.ToString();
+
+                            Racks[p][i, j].ID = counter;
+                            counter++;
+
                             string letter = rackValues[p][letterIndex];
                             Racks[p][i, j].Value = letter;
                             letterIndex++;
+
                         }
                     }
                 }
+
                 renderRack();
                 #endregion
             }
